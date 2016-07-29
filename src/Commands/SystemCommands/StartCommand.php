@@ -29,10 +29,10 @@ class StartCommand extends SystemCommand
         $chat_id = $chat->getId();
         $username = $chat->getUsername();
 
-        $text = "\xF0\x9F\x93\xA8" . ' *New message received*' . "\n\n" .
+        $text = '📨 *New message received*' . "\n\n" .
             'Hello '.$username.'!' . "\n\n" .
             'You have been selected to be the leader of a new colony on Planet X. Congratulations!' . "\n" .
-            'We sent you '."\xF0\x9F\x92\xB0".'100, '."\xF0\x9F\x8C\xBD".'100, '."\xF0\x9F\x92\x8E".'100, and '."\xF0\x9F\x91\xA8".'40 to help you start your colony.' . "\n" .
+            'We sent you 💰100, 🌽100, 💎100, and 👨40 to help you start your colony.' . "\n" .
             'Make good use of it!' . "\n\n" .
             'Regards,' . "\n" .
             'CyberCorp Corporation' . "\n\n" .
