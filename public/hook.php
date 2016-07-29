@@ -12,6 +12,9 @@ try {
     $telegram->enableAdmins($config['admins']);
     
     // Commands
+    foreach ($config['commands']['system'] as $dir) {
+        $telegram->addCommandsPath($dir);
+    }
     if ($telegram->isAdmin()) {
         foreach ($config['commands']['admin'] as $dir) {
             $telegram->addCommandsPath($dir, false);

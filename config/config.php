@@ -24,6 +24,9 @@ return [
         'admin' => [
             __DIR__ . '/../src/Commands/AdminCommands/',
         ],
+        'system' => [
+            __DIR__ . '/../src/Commands/SystemCommands/',
+        ],
         'user' => [
             __DIR__ . '/../src/Commands/UserCommands/',
             __DIR__ . '/../src/Commands/DummyCommands/',
