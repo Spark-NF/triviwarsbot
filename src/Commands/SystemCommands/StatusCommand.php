@@ -2,6 +2,7 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
+use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
 use Longman\TelegramBot\Request;
 
 /**
@@ -27,12 +28,27 @@ class StatusCommand extends SystemCommand
         $chat_id = $message->getChat()->getId();
 
         $text = '🌍 *Planet X* (5-120-7)' . "\n\n" .
-            'Resources: 💰100 🌽100 💎100 👨40' . "\n" .
-	        'Constructions: _N/A_' . "\n" .
-	        'Research: _N/A_' . "\n" .
-	        'Recruitment: _N/A_';
+            '💰 100 (2/h)' . "\n" .
+            '🌽 100 (2/h)' . "\n" .
+            '💎 100 (2/h)' . "\n" .
+            '👨 40 (1/h)' . "\n\n" .
+            'Constructions: _N/A_' . "\n" .
+            'Research: _N/A_' . "\n" .
+            'Shipyard: _N/A_';
+
+        $keyboard[] = ['🏭 Buildings', '💊 Research', '🚀 Shipyard'];
+        $keyboard[] = ['🛡 Defense', '⚔ Fleet', '🌟 Galaxy'];
+        $keyboard[] = ['🔃 Switch', '🔧 Manage'];
+
+        $markup = new ReplyKeyboardMarkup([
+            'keyboard'          => $keyboard,
+            'resize_keyboard'   => true,
+            'one_time_keyboard' => false,
+            'selective'         => false
+        ]);
 
         return Request::sendMessage([
+            'reply_markup'  => $markup,
             'chat_id'       => $chat_id,
             'parse_mode'    => 'MARKDOWN',
             'text'          => $text,
