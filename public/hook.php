@@ -1,15 +1,12 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
-use TriviWars\Entity\ConnectionFromPDO;
-use TriviWars\Entity\MyTelegram;
+use TriviWars\DB\ConnectionFromPDO;
+use TriviWars\DB\MyTelegram;
+use TriviWars\DB\TriviDB;
 
 try {
     $telegram = new MyTelegram($config['bot']['api_key'], $config['bot']['name']);

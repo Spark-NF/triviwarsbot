@@ -1,30 +1,28 @@
 #!/usr/bin/env php
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-//README
-//This configuration file is intented to run the bot with the webhook method
-//Uncommented parameters must be filled
-
-//bash script
-//while true; do ./getUpdatesCLI.php; done
-
-// Load composer
 require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
-$commands_path = __DIR__ . '/../src/Commands/';
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use TriviWars\DB\ConnectionFromPDO;
+use TriviWars\DB\MyTelegram;
+use TriviWars\DB\TriviDB;
 
 try {
-    $telegram = new Longman\TelegramBot\Telegram($config['bot']['api_key'], $config['bot']['name']);
+    $telegram = new MyTelegram($config['bot']['api_key'], $config['bot']['name']);
     
     // MySQL
-    $telegram->enableMySQL($config['mysql'], $config['mysql']['prefix']);
+    $telegram->enableMySql($config['mysql'], $config['mysql']['prefix']);
 
     // Admins
     $telegram->enableAdmins($config['admins']);
+
+    // Doctrine
+    $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['entities'], false);
+    $conn = new ConnectionFromPDO($telegram->getPDO());
+    $entityManager = EntityManager::create($conn, $doctrineConfig);
+    TriviDB::$em = $entityManager;
     
     // Commands
     foreach ($config['commands']['system'] as $dir) {
