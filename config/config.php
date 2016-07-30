@@ -15,6 +15,9 @@ return [
         'database'  => 'triviwarsbot',
         'prefix'    => '',
     ],
+    'entities' => [
+        __DIR__ . '/../src/Entity',
+    ],
     'log' => [
         'error'     => __DIR__ . '/../log/error.log',
         'debug'     => __DIR__ . '/../log/debug.log',

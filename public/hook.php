@@ -1,15 +1,30 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use TriviWars\Entity\ConnectionFromPDO;
+use TriviWars\Entity\MyTelegram;
+
 try {
-    $telegram = new Longman\TelegramBot\Telegram($config['bot']['api_key'], $config['bot']['name']);
+    $telegram = new MyTelegram($config['bot']['api_key'], $config['bot']['name']);
     
     // MySQL
-    $telegram->enableMySQL($config['mysql'], $config['mysql']['prefix']);
+    $telegram->enableMySql($config['mysql'], $config['mysql']['prefix']);
 
     // Admins
     $telegram->enableAdmins($config['admins']);
+
+    // Doctrine
+    $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['entities'], false);
+    $conn = new ConnectionFromPDO($telegram->getPDO());
+    $entityManager = EntityManager::create($conn, $doctrineConfig);
+    TriviDB::$em = $entityManager;
     
     // Commands
     foreach ($config['commands']['system'] as $dir) {

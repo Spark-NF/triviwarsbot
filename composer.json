@@ -1,5 +1,11 @@
 {
+    "autoload": {
+        "psr-4": {
+            "TriviWars\\":"src/"
+        }
+    },
     "require": {
-        "longman/telegram-bot": "^0.34.0"
+        "longman/telegram-bot": "^0.34.0",
+        "doctrine/orm": "^2.5"
     }
 }

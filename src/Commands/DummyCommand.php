@@ -1,5 +1,5 @@
 <?php
-namespace Commands;
+namespace TriviWars\Commands;
 
 use Longman\TelegramBot\Commands\Command;
 use Longman\TelegramBot\Request;

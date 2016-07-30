@@ -1,7 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Commands\DummyCommand;
+use TriviWars\Commands\DummyCommand;
 
 /**
  * Dummy "/echo" command
