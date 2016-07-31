@@ -1,7 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
-use Longman\TelegramBot\Commands\SystemCommand;
+use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
 use Longman\TelegramBot\Request;
@@ -9,7 +9,7 @@ use Longman\TelegramBot\Request;
 /**
  * Status command
  */
-class StatusCommand extends SystemCommand
+class StatusCommand extends UserCommand
 {
     /**#@+
      * {@inheritdoc}
@@ -27,8 +27,6 @@ class StatusCommand extends SystemCommand
     {
         $message = $this->getMessage();
         $chat_id = $message->getChat()->getId();
-
-        DB::isDbConnected();
 
         $text = '🌍 *Planet X* (5-120-7)' . "\n\n" .
             '💰 100 (2/h)' . "\n" .

@@ -4,8 +4,6 @@ namespace TriviWars\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Page
- *
  * @ORM\Entity
  * @ORM\Table(name="planet")
  */
@@ -24,4 +22,11 @@ class Planet extends BaseEntity
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     protected $name;
+
+    /**
+     * @var Player
+     * @ORM\ManyToOne(targetEntity="Player", inversedBy="planets", fetch="LAZY")
+     * @ORM\JoinColumn(name="player_id", referencedColumnName="id")
+     **/
+    protected $player;
 }

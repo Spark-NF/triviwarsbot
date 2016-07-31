@@ -5,7 +5,6 @@ $config = require __DIR__ . '/../config/config.php';
 
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
-use TriviWars\DB\ConnectionFromPDO;
 use TriviWars\DB\MyTelegram;
 use TriviWars\DB\TriviDB;
 
@@ -19,10 +18,10 @@ try {
     $telegram->enableAdmins($config['admins']);
 
     // Doctrine
-    $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['entities'], false);
-    $conn = new ConnectionFromPDO($telegram->getPDO());
+    $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['entities'], false, null, null, false);
+    $conn = new Doctrine\DBAL\Connection(array('pdo' => $telegram->getPDO()), new Doctrine\DBAL\Driver\PDOMySql\Driver());
     $entityManager = EntityManager::create($conn, $doctrineConfig);
-    TriviDB::$em = $entityManager;
+    TriviDB::setEntityManager($entityManager);
     
     // Commands
     foreach ($config['commands']['system'] as $dir) {

@@ -3,6 +3,9 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
+use TriviWars\DB\TriviDB;
+use TriviWars\Entity\Planet;
+use TriviWars\Entity\Player;
 
 /**
  * Start command
@@ -24,14 +27,38 @@ class StartCommand extends SystemCommand
     public function execute()
     {
         $message = $this->getMessage();
-
         $chat = $message->getChat();
         $chat_id = $chat->getId();
         $username = $chat->getUsername();
 
+        // Check if the player does not already have an account
+        $em = TriviDB::getEntityManager();
+        $existing = $em->getRepository('TriviWars\\Entity\\Player')->findBy(array('chatId' => $chat_id));
+        if (!empty($existing))
+        {
+            $text = '❌ *You already have a game started*';
+
+            return Request::sendMessage([
+                'chat_id'       => $chat_id,
+                'parse_mode'    => 'MARKDOWN',
+                'text'          => $text,
+            ]);
+        }
+
+        // Create a new account and planet for this player
+        $player = new Player();
+        $player->setChatId($chat_id);
+        $planet = new Planet();
+        $planet->setPlayer($player);
+        $planet->setName('Planet '.rand(100, 999));
+        $em->persist($player);
+        $em->persist($planet);
+        $em->flush();
+
+        // Welcome message
         $text = '📨 *New message received*' . "\n\n" .
             'Hello '.$username.'!' . "\n\n" .
-            'You have been selected to be the leader of a new colony on Planet X. Congratulations!' . "\n" .
+            'You have been selected to be the leader of a new colony on '.$planet->getName().'. Congratulations!' . "\n" .
             'We sent you 💰100, 🌽100, 💎100, and 👨40 to help you start your colony.' . "\n" .
             'Make good use of it!' . "\n\n" .
             'Regards,' . "\n" .
