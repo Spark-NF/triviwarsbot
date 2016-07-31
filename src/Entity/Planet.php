@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Page
  *
  * @ORM\Entity
- * @ORM\Table(name="page")
+ * @ORM\Table(name="planet")
  */
 class Planet extends BaseEntity
 {
