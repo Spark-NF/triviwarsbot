@@ -3,6 +3,7 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use TriviWars\Req;
 use TriviWars\DB\TriviDB;
+use TriviWars\Entity\PlanetBuilding;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
@@ -30,14 +31,30 @@ class BuildCommand extends UserCommand
         $em = TriviDB::getEntityManager();
         
         $conversation = new Conversation($user_id, $chat_id, 'build');
+        $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
+
         
         $command = trim($message->getText(true));
         if ($command != '🏭 Buildings') {
             // Get buildings
-            $building = $em->getRepository('TriviWars\\Entity\\Building')->findOneBy(array('name' => $command));
+            $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
                 Req::error($chat_id, 'Invalid building name');
             }
+
+            $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(array('planet' => $planet, 'building' => $building));
+            if (empty($planetBuilding)) {
+                $planetBuilding = new PlanetBuilding();
+                $planetBuilding->setBuilding($building);
+                $planetBuilding->setPlanet($planet);
+                $planetBuilding->setLevel(0);
+            }
+
+            $planetBuilding->setLevel($planetBuilding->getLevel() + 1);
+            $em->merge($planetBuilding);
+
+            // TODO: remove resources
+            $em->flush();
         
             $conversation->stop();
         
@@ -45,8 +62,13 @@ class BuildCommand extends UserCommand
             return $this->telegram->executeCommand('status');
         }
         
-        // Get buildings
-        $buildings = $em->getRepository('TriviWars\\Entity\\Building')->findAll();
+        // Get buildings and their levels
+        $buildings = $em->getRepository('TW:Building')->findAll();
+        $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
+        $levels = [];
+        foreach ($planetBuildings as $building) {
+            $levels[$building->getId()] = $building->getLevel();
+        }
 
         // Generate reply text
         $text = '';
@@ -55,7 +77,8 @@ class BuildCommand extends UserCommand
                 $text .= "\n";
             }
             
-            $currentLevel = 0;
+            $id = $building->getId();
+            $currentLevel = isset($levels[$id]) ? $levels[$id] : 0;
             $price = $building->getPriceForLevel($currentLevel + 1);
             $conso = $building->getConsumptionForLevel($currentLevel + 1);
             

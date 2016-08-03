@@ -18,6 +18,7 @@ try {
 
     // Doctrine
     $doctrineConfig = Setup::createAnnotationMetadataConfiguration($config['entities'], false, null, null, false);
+    $doctrineConfig->addEntityNamespace('TW', 'TriviWars\\Entity');
     $conn = new Doctrine\DBAL\Connection(array('pdo' => $telegram->getPDO()), new Doctrine\DBAL\Driver\PDOMySql\Driver());
     $entityManager = EntityManager::create($conn, $doctrineConfig);
     TriviDB::setEntityManager($entityManager);
