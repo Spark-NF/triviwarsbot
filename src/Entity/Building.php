@@ -24,38 +24,38 @@ class Building extends BaseEntity
     protected $name;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $cost_1_a;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $cost_1_b;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $cost_2_a;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $cost_2_b;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $consumption_a;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
      **/
     protected $consumption_b;
     
@@ -69,6 +69,6 @@ class Building extends BaseEntity
     
     public function getConsumptionForLevel($level)
     {
-        return floor($this->consumption_a * $level * pow($this->consumption_a, $level));
+        return floor($this->consumption_a * $level * pow($this->consumption_b, $level));
     }
 }
