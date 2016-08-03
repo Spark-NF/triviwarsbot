@@ -59,7 +59,7 @@ class BuildCommand extends UserCommand
             $price = $building->getPriceForLevel($currentLevel + 1);
             $conso = $building->getConsumptionForLevel($currentLevel + 1);
             
-            $text .= $building->getName().' ('.($currentLevel + 1).') - 💰'.$price[0].' 🌽'.$price[1].' 💡'.$conso;
+            $text .= $building->getName().' ('.($currentLevel + 1).') - 💰'.$price[0].' 🌽'.$price[1].' ⚡️'.$conso;
         }
 
         // Generate keyboard with 3 buildings per line

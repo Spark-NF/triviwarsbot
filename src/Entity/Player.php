@@ -14,15 +14,8 @@ class Player extends BaseEntity
      * @var int
      * @ORM\Id
      * @ORM\Column(type="integer", nullable=false)
-     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-
-    /**
-     * @var int
-     * @ORM\Column(name="chat_id", type="integer", nullable=false)
-     */
-    protected $chatId;
 
     /**
      * @var Planet[]

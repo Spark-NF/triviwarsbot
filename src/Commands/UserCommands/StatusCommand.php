@@ -30,17 +30,17 @@ class StatusCommand extends UserCommand
     public function execute()
     {
         $message = $this->getMessage();
+        $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
 
         $em = TriviDB::getEntityManager();
-        $player = $em->getRepository('TriviWars\\Entity\\Player')->findOneBy(array('chatId' => $chat_id));
-        $planet = $em->getRepository('TriviWars\\Entity\\Planet')->findOneBy(array('player' => $player));
+        $planet = $em->getRepository('TriviWars\\Entity\\Planet')->findOneBy(array('player' => $em->getReference('TriviWars\\Entity\\Player', $user_id)));
 
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
             '💰 100 (2/h)' . "\n" .
             '🌽 100 (2/h)' . "\n" .
             '💎 100 (2/h)' . "\n" .
-            '💡 40 (1/h)' . "\n\n" .
+            '⚡️ 40 (1/h)' . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';

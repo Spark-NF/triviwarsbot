@@ -28,13 +28,14 @@ class StartCommand extends SystemCommand
     public function execute()
     {
         $message = $this->getMessage();
+        $user_id = $message->getFrom()->getId();
         $chat = $message->getChat();
         $chat_id = $chat->getId();
         $username = $chat->getUsername();
 
         // Check if the player does not already have an account
         $em = TriviDB::getEntityManager();
-        $existing = $em->getRepository('TriviWars\\Entity\\Player')->findBy(array('chatId' => $chat_id));
+        $existing = $em->getRepository('TriviWars\\Entity\\Player')->find($user_id);
         if (!empty($existing))
         {
             return Req::error($chat_id, 'You already have a game started');
@@ -42,7 +43,7 @@ class StartCommand extends SystemCommand
 
         // Create a new account and planet for this player
         $player = new Player();
-        $player->setChatId($chat_id);
+        $player->setId($user_id);
         $planet = new Planet();
         $planet->setPlayer($player);
         $planet->setName('Planet '.rand(100, 999));

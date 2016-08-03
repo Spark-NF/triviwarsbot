@@ -86,11 +86,7 @@ class BaseEntity
         }
 
         if (property_exists($this, $var)) {
-            if ($var != 'id') {
-                $this->$var = $val;
-            } elseif (!$continueOnFailure) {
-                throw new \Exception('Cannot change ID.');
-            }
+            $this->$var = $val;
         } elseif (!$continueOnFailure) {
             throw new \Exception('Member `' . $var . '` does not exists (set).');
         }
