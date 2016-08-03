@@ -40,7 +40,7 @@ class StatusCommand extends UserCommand
             '💰 100 (2/h)' . "\n" .
             '🌽 100 (2/h)' . "\n" .
             '💎 100 (2/h)' . "\n" .
-            '⚡️ 40 (1/h)' . "\n\n" .
+            '⚡ 40 (1/h)' . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';

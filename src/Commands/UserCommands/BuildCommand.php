@@ -72,14 +72,14 @@ class BuildCommand extends UserCommand
         $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
         $levels = [];
         foreach ($planetBuildings as $building) {
-            $levels[$building->getId()] = $building->getLevel();
+            $levels[$building->getBuilding()->getId()] = $building->getLevel();
         }
 
         // Generate reply text
         $text = '';
         foreach ($buildings as $i => $building) {
             if ($i > 0) {
-                $text .= "\n";
+                $text .= "\n\n";
             }
             
             $id = $building->getId();
@@ -88,21 +88,23 @@ class BuildCommand extends UserCommand
             $conso = $building->getConsumptionForLevel($currentLevel + 1);
             $consoCurrent = $building->getConsumptionForLevel($currentLevel);
             
-            $text .= $building->getName().' ('.($currentLevel + 1).') -';
+            $line1 = $building->getName().' ('.($currentLevel + 1).') - 💰50/h (+20)';
+            $line2 = '';
             if (!empty($price[0])) {
-                $text .= ' 💰'.$price[0];
+                $line2 .= (!empty($line2) ? ' ' : '') . '💰'.$price[0];
             }
             if (!empty($price[1])) {
-                $text .= ' 🌽'.$price[1];
+                $line2 .= (!empty($line2) ? ' ' : '') . '🌽'.$price[1];
             }
             if (!empty($conso)) {
-                $text .= ' ⚡️'.$conso;
+                $line2 .= (!empty($line2) ? ' ' : '') . '⚡️'.$conso;
                 if ($conso != $consoCurrent) {
-                    ' (+'.($conso - $consoCurrent).')';
+                    $line2 .= ' (+'.($conso - $consoCurrent).')';
                 } else {
-                    ' (=)';
+                    $line2 .= ' (=)';
                 }
             }
+            $text .= $line1 . "\n" . $line2;
         }
 
         // Generate keyboard with 3 buildings per line
