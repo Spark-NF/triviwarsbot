@@ -36,6 +36,11 @@ class BuildCommand extends UserCommand
         
         $command = trim($message->getText(true));
         if ($command != '🏭 Buildings') {
+            if ($command == '🔙 Back') {
+                $conversation->cancel();
+                return $this->telegram->executeCommand('status');
+            }
+
             // Get buildings
             $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
@@ -81,8 +86,23 @@ class BuildCommand extends UserCommand
             $currentLevel = isset($levels[$id]) ? $levels[$id] : 0;
             $price = $building->getPriceForLevel($currentLevel + 1);
             $conso = $building->getConsumptionForLevel($currentLevel + 1);
+            $consoCurrent = $building->getConsumptionForLevel($currentLevel);
             
-            $text .= $building->getName().' ('.($currentLevel + 1).') - 💰'.$price[0].' 🌽'.$price[1].' ⚡️'.$conso;
+            $text .= $building->getName().' ('.($currentLevel + 1).') -';
+            if (!empty($price[0])) {
+                $text .= ' 💰'.$price[0];
+            }
+            if (!empty($price[1])) {
+                $text .= ' 🌽'.$price[1];
+            }
+            if (!empty($conso)) {
+                $text .= ' ⚡️'.$conso;
+                if ($conso != $consoCurrent) {
+                    ' (+'.($conso - $consoCurrent).')';
+                } else {
+                    ' (=)';
+                }
+            }
         }
 
         // Generate keyboard with 3 buildings per line
