@@ -1,6 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Req;
 use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Request;
 use TriviWars\DB\TriviDB;
@@ -36,13 +37,7 @@ class StartCommand extends SystemCommand
         $existing = $em->getRepository('TriviWars\\Entity\\Player')->findBy(array('chatId' => $chat_id));
         if (!empty($existing))
         {
-            $text = '❌ *You already have a game started*';
-
-            return Request::sendMessage([
-                'chat_id'       => $chat_id,
-                'parse_mode'    => 'MARKDOWN',
-                'text'          => $text,
-            ]);
+            return Req::error($chat_id, 'You already have a game started');
         }
 
         // Create a new account and planet for this player

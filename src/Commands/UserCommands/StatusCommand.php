@@ -1,10 +1,14 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Req;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
 use Longman\TelegramBot\Request;
+use TriviWars\DB\TriviDB;
+use TriviWars\Entity\Planet;
+use TriviWars\Entity\Player;
 
 /**
  * Status command
@@ -28,11 +32,15 @@ class StatusCommand extends UserCommand
         $message = $this->getMessage();
         $chat_id = $message->getChat()->getId();
 
-        $text = '🌍 *Planet X* (5-120-7)' . "\n\n" .
+        $em = TriviDB::getEntityManager();
+        $player = $em->getRepository('TriviWars\\Entity\\Player')->findOneBy(array('chatId' => $chat_id));
+        $planet = $em->getRepository('TriviWars\\Entity\\Planet')->findOneBy(array('player' => $player));
+
+        $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
             '💰 100 (2/h)' . "\n" .
             '🌽 100 (2/h)' . "\n" .
             '💎 100 (2/h)' . "\n" .
-            '👨 40 (1/h)' . "\n\n" .
+            '💡 40 (1/h)' . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';
