@@ -46,6 +46,8 @@ class HelpCommand extends UserCommand
                     $user[] = $command;
                 }
             }
+
+            $text = '';
             
             // How commands by role
             if (!empty($admin)) {

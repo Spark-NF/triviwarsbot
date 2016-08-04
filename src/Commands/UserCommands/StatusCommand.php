@@ -61,9 +61,9 @@ class StatusCommand extends UserCommand
         $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
 
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
-            '💰 '.floor($planet->getResource1()).' ('.($prod[0] * $factor).'/h)' . "\n" .
-            '🌽 '.floor($planet->getResource2()).' ('.($prod[1] * $factor).'/h)' . "\n" .
-            '⚡ '.$conso.'/'.$energy . ($factor < 1 ? ' ('.round($factor * 100).'%)' : '') . "\n\n" .
+            '💰 '.number_format(floor($planet->getResource1())).' ('.number_format($prod[0] * $factor).'/h)' . "\n" .
+            '🌽 '.number_format(floor($planet->getResource2())).' ('.number_format($prod[1] * $factor).'/h)' . "\n" .
+            '⚡ '.number_format($conso).'/'.number_format($energy) . ($factor < 1 ? ' ('.round($factor * 100).'%)' : '') . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';

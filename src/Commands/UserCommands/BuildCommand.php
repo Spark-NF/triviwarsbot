@@ -14,9 +14,9 @@ class BuildCommand extends UserCommand
     /**#@+
      * {@inheritdoc}
      */
-    protected $name = 'status';
-    protected $description = 'Check the status of the current planet';
-    protected $usage = '/status';
+    protected $name = 'build';
+    protected $description = 'Manage buildings on the planet';
+    protected $usage = '/build';
     protected $version = '1.0.0';
     /**#@-*/
 
