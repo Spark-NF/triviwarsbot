@@ -33,8 +33,10 @@ class BuildCommand extends UserCommand
         $conversation = new Conversation($user_id, $chat_id, 'build');
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
 
+        // If the command is not for the list, it's an upgrade
         $command = trim($message->getText(true));
         if ($command != '🏭 Buildings') {
+            // Go back to status command
             if ($command == '🔙 Back') {
                 $conversation->cancel();
                 return $this->telegram->executeCommand('status');
@@ -46,6 +48,7 @@ class BuildCommand extends UserCommand
                 Req::error($chat_id, 'Invalid building name');
             }
 
+            // Get current building level or create it if not found
             $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(array('planet' => $planet, 'building' => $building));
             if (empty($planetBuilding)) {
                 $planetBuilding = new PlanetBuilding();
@@ -85,6 +88,7 @@ class BuildCommand extends UserCommand
                 $text .= "\n\n";
             }
 
+            // Get building information and costs
             $id = $building->getId();
             $currentLevel = isset($levels[$id]) ? $levels[$id] : 0;
             $price = $building->getPriceForLevel($currentLevel + 1);
@@ -96,56 +100,25 @@ class BuildCommand extends UserCommand
             $energyCurrent = $building->getEnergyForLevel($currentLevel);
 
             // Name
-            $line1 = $building->getName().' ('.($currentLevel + 1).') -';
+            $name = $building->getName().' ('.($currentLevel + 1).')';
 
             // Production
-            if (!empty($prod[0])) {
-                $line1 .= ' 💰'.$prod[0];
-                if ($prod[0] != $prodCurrent[0]) {
-                    $line1 .= ' (+'.($prod[0] - $prodCurrent[0]).')';
-                } else {
-                    $line1 .= ' (=)';
-                }
-            }
-            if (!empty($prod[1])) {
-                $line1 .= ' 🌽'.$prod[1];
-                if ($prod[1] != $prodCurrent[1]) {
-                    $line1 .= ' (+'.($prod[1] - $prodCurrent[1]).')';
-                } else {
-                    $line1 .= ' (=)';
-                }
-            }
-            if (!empty($energy)) {
-                $line1 .= ' ⚡️'.$energy;
-                if ($energy != $energyCurrent) {
-                    $line1 .= ' (+'.($energy - $energyCurrent).')';
-                } else {
-                    $line1 .= ' (=)';
-                }
-            }
+            $production  = $this->displayUnit('💰', $prod[0], $prodCurrent[0]);
+            $production .= $this->displayUnit('🌽', $prod[1], $prodCurrent[1]);
+            $production .= $this->displayUnit('⚡', $energy, $energyCurrent);
 
             // Price
-            $line2 = '';
-            if (!empty($price[0])) {
-                $line2 .= (!empty($line2) ? ' ' : '') . '💰'.$price[0];
-            }
-            if (!empty($price[1])) {
-                $line2 .= (!empty($line2) ? ' ' : '') . '🌽'.$price[1];
-            }
-            if (!empty($conso)) {
-                $line2 .= (!empty($line2) ? ' ' : '') . '⚡️'.$conso;
-                if ($conso != $consoCurrent) {
-                    $line2 .= ' (+'.($conso - $consoCurrent).')';
-                } else {
-                    $line2 .= ' (=)';
-                }
-            }
-            $text .= $line1 . "\n" . $line2;
+            $cost  = $this->displayUnit('💰', $price[0]);
+            $cost .= $this->displayUnit('🌽', $price[1]);
+            $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
+
+            $text .= $name . (!empty($production) ? ' - '.$production : '') . "\n" . $cost;
         }
 
         // Generate keyboard with 3 buildings per line
         $keyboard = [];
         $curr = [];
+        $i = 0;
         foreach ($buildings as $i => $building) {
             $curr[] = $building->getName();
 
@@ -166,5 +139,21 @@ class BuildCommand extends UserCommand
             'selective'         => false
         ]);
         return Req::send($chat_id, $text, $markup);
+    }
+
+    protected function displayUnit($unit, $prod, $current = null)
+    {
+        $ret = '';
+        if (!empty($prod)) {
+            $ret .= ' '.$unit.$prod;
+            if ($current !== null) {
+                if ($prod != $current) {
+                    $ret .= ' (+'.($prod - $current).')';
+                } else {
+                    $ret .= ' (=)';
+                }
+            }
+        }
+        return trim($ret);
     }
 }
