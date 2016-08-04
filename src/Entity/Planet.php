@@ -2,6 +2,7 @@
 namespace TriviWars\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -55,13 +56,62 @@ class Planet extends BaseEntity
      */
     protected $buildings;
 
+    /**
+     * @var ConstructionBuilding[]
+     * @ORM\OneToMany(targetEntity="ConstructionBuilding", mappedBy="planet")
+     * @ORM\OrderBy({"finish" = "ASC"})
+     */
+    protected $constructionBuildings;
+
     public function __construct()
     {
         $this->buildings = new ArrayCollection();
+        $this->constructionBuildings = new ArrayCollection();
     }
-    
-    public function update()
+
+    /**
+     * @param EntityManager $em
+     */
+    public function update($em)
     {
+        $from = $this->updated->getTimestamp();
+
+        // Apply finished constructions
+        foreach ($this->getConstructionBuildings() as $c) {
+            if (!$c->isFinished()) {
+                break;
+            }
+
+            $to = $c->getFinish()->getTimestamp();
+            $this->updateBetween($from, $to);
+            $from = $to;
+
+            // Increase building level
+            $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(array('planet' => $this, 'building' => $c->getBuilding()));
+            if (empty($planetBuilding)) {
+                $planetBuilding = new PlanetBuilding();
+                $planetBuilding->setBuilding($c->getBuilding());
+                $planetBuilding->setPlanet($this);
+                $planetBuilding->setLevel(1);
+                $this->buildings[] = $planetBuilding;
+            } else {
+                $planetBuilding->setLevel($planetBuilding->getLevel() + 1);
+            }
+            $em->merge($planetBuilding);
+            $em->remove($c);
+        }
+
+        $this->updateBetween($from, time());
+        $this->setUpdated(new \DateTime('now'));
+    }
+
+    protected function updateBetween($from, $to)
+    {
+        $diff = $to - $from;
+        if ($diff < 0) {
+            return;
+        }
+
         $prod = array(60, 30);
         $energy = 0;
         $conso = 0;
@@ -85,14 +135,13 @@ class Planet extends BaseEntity
 
         $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
 
-        $hours = (time() - $this->updated->getTimestamp()) / 3600;
+        $hours = $diff / 3600;
         $gain = array(
             $prod[0] * $factor * $hours,
             $prod[1] * $factor * $hours,
         );
 
         $this->gain($gain);
-        $this->setUpdated(new \DateTime('now'));
     }
 
     /**

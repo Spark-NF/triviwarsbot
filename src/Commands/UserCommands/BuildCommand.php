@@ -1,11 +1,12 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Entity\ConstructionBuilding;
+use TriviWars\Entity\Planet;
 use TriviWars\Req;
 use TriviWars\DB\TriviDB;
 use TriviWars\Entity\PlanetBuilding;
 use Longman\TelegramBot\Commands\UserCommand;
-use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
 use Longman\TelegramBot\Conversation;
 
@@ -33,8 +34,9 @@ class BuildCommand extends UserCommand
 
         // Get current planet
         $em = TriviDB::getEntityManager();
+        /** @var Planet $planet */
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
-        $planet->update();
+        $planet->update($em);
         $em->merge($planet);
         $em->flush();
 
@@ -70,10 +72,17 @@ class BuildCommand extends UserCommand
             $planet->pay($price);
             $em->merge($planet);
 
+            // Upgrade duration
+            $duration = ($price[0] + $price[1]) / (2500);
+            $duration *= 3600;
+
             // Update building level
-            // TODO: timer to upgrade instead of instant
-            $planetBuilding->setLevel($planetBuilding->getLevel() + 1);
-            $em->merge($planetBuilding);
+            $construction = new ConstructionBuilding();
+            $construction->setPlanet($planet);
+            $construction->setBuilding($building);
+            $construction->setLevel($planetBuilding->getLevel() + 1);
+            $construction->setFinish(new \DateTime(date('c', time() + $duration)));
+            $em->persist($construction);
 
             $em->flush();
 

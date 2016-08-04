@@ -1,6 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Entity\Planet;
 use TriviWars\Req;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
@@ -31,8 +32,9 @@ class StatusCommand extends UserCommand
 
         // Get current planet
         $em = TriviDB::getEntityManager();
+        /** @var Planet $planet */
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
-        $planet->update();
+        $planet->update($em);
         $em->merge($planet);
         $em->flush();
 
@@ -60,11 +62,17 @@ class StatusCommand extends UserCommand
         // Energy factor
         $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
 
+        // Constructions
+        $constructions = [];
+        foreach ($planet->getConstructionBuildings() as $c) {
+            $constructions[] = $c->getBuilding()->getName().' ('.($c->getFinish()->getTimestamp() - time()).')';
+        }
+
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
             '💰 '.number_format(floor($planet->getResource1())).' ('.number_format($prod[0] * $factor).'/h)' . "\n" .
             '🌽 '.number_format(floor($planet->getResource2())).' ('.number_format($prod[1] * $factor).'/h)' . "\n" .
             '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n" .
-            'Constructions: _N/A_' . "\n" .
+            'Constructions: ' . (empty($constructions) ? '_N/A_' : implode(', ', $constructions)) . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';
 
