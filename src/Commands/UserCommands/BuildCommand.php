@@ -29,11 +29,10 @@ class BuildCommand extends UserCommand
         $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
         $em = TriviDB::getEntityManager();
-        
+
         $conversation = new Conversation($user_id, $chat_id, 'build');
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
 
-        
         $command = trim($message->getText(true));
         if ($command != '🏭 Buildings') {
             if ($command == '🔙 Back') {
@@ -60,13 +59,13 @@ class BuildCommand extends UserCommand
 
             // TODO: remove resources
             $em->flush();
-        
+
             $conversation->stop();
-        
+
             Req::success($chat_id, 'Up '.$building->getName());
             return $this->telegram->executeCommand('status');
         }
-        
+
         // Get buildings and their levels
         $buildings = $em->getRepository('TW:Building')->findAll();
         $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
@@ -85,7 +84,7 @@ class BuildCommand extends UserCommand
             if ($i > 0) {
                 $text .= "\n\n";
             }
-            
+
             $id = $building->getId();
             $currentLevel = isset($levels[$id]) ? $levels[$id] : 0;
             $price = $building->getPriceForLevel($currentLevel + 1);
@@ -149,7 +148,7 @@ class BuildCommand extends UserCommand
         $curr = [];
         foreach ($buildings as $i => $building) {
             $curr[] = $building->getName();
-        
+
             if ($i % 3 == 2 && $i != 0) {
                 $keyboard[] = $curr;
                 $curr = [];
