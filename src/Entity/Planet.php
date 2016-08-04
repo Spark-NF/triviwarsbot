@@ -91,8 +91,35 @@ class Planet extends BaseEntity
             $prod[1] * $factor * $hours,
         );
 
+        $this->gain($gain);
+        $this->setUpdated(new \DateTime('now'));
+    }
+
+    /**
+     * @param array $price
+     * @return bool
+     */
+    public function canPay($price)
+    {
+        return $this->getResource1() >= $price[0]
+        && $this->getResource2() >= $price[1];
+    }
+
+    /**
+     * @param array $price
+     */
+    public function pay($price)
+    {
+        $this->setResource1($this->getResource1() - $price[0]);
+        $this->setResource2($this->getResource2() - $price[1]);
+    }
+
+    /**
+     * @param array $gain
+     */
+    public function gain($gain)
+    {
         $this->setResource1($this->getResource1() + $gain[0]);
         $this->setResource2($this->getResource2() + $gain[1]);
-        $this->setUpdated(new \DateTime('now'));
     }
 }

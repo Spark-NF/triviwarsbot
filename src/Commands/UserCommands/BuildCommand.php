@@ -28,10 +28,15 @@ class BuildCommand extends UserCommand
         $message = $this->getMessage();
         $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
-        $em = TriviDB::getEntityManager();
 
         $conversation = new Conversation($user_id, $chat_id, 'build');
+
+        // Get current planet
+        $em = TriviDB::getEntityManager();
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
+        $planet->update();
+        $em->merge($planet);
+        $em->flush();
 
         // If the command is not for the list, it's an upgrade
         $command = trim($message->getText(true));
@@ -45,7 +50,7 @@ class BuildCommand extends UserCommand
             // Get buildings
             $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
-                Req::error($chat_id, 'Invalid building name');
+                return Req::error($chat_id, 'Invalid building name');
             }
 
             // Get current building level or create it if not found
@@ -57,10 +62,19 @@ class BuildCommand extends UserCommand
                 $planetBuilding->setLevel(0);
             }
 
+            // Pay the cost
+            $price = $building->getPriceForLevel($planetBuilding->getLevel() + 1);
+            if (!$planet->canPay($price)) {
+                return Req::error($chat_id, 'You do not have enough resources');
+            }
+            $planet->pay($price);
+            $em->merge($planet);
+
+            // Update building level
+            // TODO: timer to upgrade instead of instant
             $planetBuilding->setLevel($planetBuilding->getLevel() + 1);
             $em->merge($planetBuilding);
 
-            // TODO: remove resources
             $em->flush();
 
             $conversation->stop();
