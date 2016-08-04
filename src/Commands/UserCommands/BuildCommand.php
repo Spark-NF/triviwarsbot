@@ -72,7 +72,11 @@ class BuildCommand extends UserCommand
         $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
         $levels = [];
         foreach ($planetBuildings as $building) {
-            $levels[$building->getBuilding()->getId()] = $building->getLevel();
+            $b = $building->getBuilding();
+            if (empty($b)) {
+                continue;
+            }
+            $levels[$b->getId()] = $building->getLevel();
         }
 
         // Generate reply text
@@ -87,8 +91,41 @@ class BuildCommand extends UserCommand
             $price = $building->getPriceForLevel($currentLevel + 1);
             $conso = $building->getConsumptionForLevel($currentLevel + 1);
             $consoCurrent = $building->getConsumptionForLevel($currentLevel);
-            
-            $line1 = $building->getName().' ('.($currentLevel + 1).') - 💰50/h (+20)';
+            $prod = $building->getProductionForLevel($currentLevel + 1);
+            $prodCurrent = $building->getProductionForLevel($currentLevel);
+            $energy = $building->getEnergyForLevel($currentLevel + 1);
+            $energyCurrent = $building->getEnergyForLevel($currentLevel);
+
+            // Name
+            $line1 = $building->getName().' ('.($currentLevel + 1).') -';
+
+            // Production
+            if (!empty($prod[0])) {
+                $line1 .= ' 💰'.$prod[0];
+                if ($prod[0] != $prodCurrent[0]) {
+                    $line1 .= ' (+'.($prod[0] - $prodCurrent[0]).')';
+                } else {
+                    $line1 .= ' (=)';
+                }
+            }
+            if (!empty($prod[1])) {
+                $line1 .= ' 🌽'.$prod[1];
+                if ($prod[1] != $prodCurrent[1]) {
+                    $line1 .= ' (+'.($prod[1] - $prodCurrent[1]).')';
+                } else {
+                    $line1 .= ' (=)';
+                }
+            }
+            if (!empty($energy)) {
+                $line1 .= ' ⚡️'.$energy;
+                if ($energy != $energyCurrent) {
+                    $line1 .= ' (+'.($energy - $energyCurrent).')';
+                } else {
+                    $line1 .= ' (=)';
+                }
+            }
+
+            // Price
             $line2 = '';
             if (!empty($price[0])) {
                 $line2 .= (!empty($line2) ? ' ' : '') . '💰'.$price[0];
