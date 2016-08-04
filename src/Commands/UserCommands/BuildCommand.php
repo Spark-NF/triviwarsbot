@@ -55,6 +55,12 @@ class BuildCommand extends UserCommand
                 return Req::error($chat_id, 'Invalid building name');
             }
 
+            // Check for another construction order
+            $constructionBuilding = $em->getRepository('TW:ConstructionBuilding')->findOneBy(array('planet' => $planet, 'building' => $building));
+            if (!empty($constructionBuilding)) {
+                return Req::error($chat_id, 'This building is already under construction');
+            }
+
             // Get current building level or create it if not found
             $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(array('planet' => $planet, 'building' => $building));
             if (empty($planetBuilding)) {
@@ -104,6 +110,13 @@ class BuildCommand extends UserCommand
             $levels[$b->getId()] = $building->getLevel();
         }
 
+        // Get buildings under construction
+        $constructionBuildings = $planet->getConstructionBuildings();
+        $constructions = [];
+        foreach ($constructionBuildings as $c) {
+            $constructions[$c->getBuilding()->getId()] = $c;
+        }
+
         // Generate reply text
         $text = '';
         foreach ($buildings as $i => $building) {
@@ -132,7 +145,7 @@ class BuildCommand extends UserCommand
             $cost .= $this->displayUnit('🌽', $price[1]);
             $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
 
-            $text .= '*'.$building->getName().'* ('.$currentLevel.' > '.($currentLevel + 1).')';
+            $text .= '*'.$building->getName().'* ('.(isset($constructions[$building->getId()]) ? 'under construction' : $currentLevel.' > '.($currentLevel + 1)).')';
             if (!empty($production)) {
                 $text .= "\n" . '- Production:'.$production;
             }

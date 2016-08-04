@@ -47,4 +47,28 @@ class ConstructionBuilding extends BaseEntity
     {
         return $this->finish->getTimestamp() <= time();
     }
+
+    public function getRemainingTime($time)
+    {
+        $duration = $this->finish->getTimestamp() - $time;
+
+        $ret = '';
+        if ($duration > 24 * 3600) {
+            $days = floor($duration / (24 * 3600));
+            $duration -= $days * 24 * 3600;
+            $ret .= $days.'d';
+        }
+        if ($duration > 3600) {
+            $hours = floor($duration / 3600);
+            $duration -= $hours * 3600;
+            $ret .= $hours.'h';
+        }
+        if ($duration > 60) {
+            $mins = floor($duration / 60);
+            $duration -= $mins * 60;
+            $ret .= $mins.'m';
+        }
+        $ret .= $duration.'s';
+        return $ret;
+    }
 }

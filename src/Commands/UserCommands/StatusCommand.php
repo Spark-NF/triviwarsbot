@@ -65,7 +65,7 @@ class StatusCommand extends UserCommand
         // Constructions
         $constructions = [];
         foreach ($planet->getConstructionBuildings() as $c) {
-            $constructions[] = $c->getBuilding()->getName().' ('.($c->getFinish()->getTimestamp() - time()).')';
+            $constructions[] = $c->getBuilding()->getName().' ('.$c->getRemainingTime(time()).')';
         }
 
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
