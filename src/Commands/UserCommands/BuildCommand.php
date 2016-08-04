@@ -113,9 +113,6 @@ class BuildCommand extends UserCommand
             $energy = $building->getEnergyForLevel($currentLevel + 1);
             $energyCurrent = $building->getEnergyForLevel($currentLevel);
 
-            // Name
-            $name = $building->getName().' ('.($currentLevel + 1).')';
-
             // Production
             $production  = $this->displayUnit('💰', $prod[0], $prodCurrent[0], 'h');
             $production .= $this->displayUnit('🌽', $prod[1], $prodCurrent[1], 'h');
@@ -126,11 +123,11 @@ class BuildCommand extends UserCommand
             $cost .= $this->displayUnit('🌽', $price[1]);
             $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
 
-            $text .= $name;
+            $text .= '*'.$building->getName().'* ('.$currentLevel.' > '.($currentLevel + 1).')';
             if (!empty($production)) {
-                $text .= "\n" . '- Production: '.$production;
+                $text .= "\n" . '- Production:'.$production;
             }
-            $text .= "\n" . '- Cost: ' . $cost;
+            $text .= "\n" . '- Cost:' . $cost;
         }
 
         // Generate keyboard with 3 buildings per line
@@ -172,6 +169,6 @@ class BuildCommand extends UserCommand
                 }
             }
         }
-        return trim($ret);
+        return $ret;
     }
 }
