@@ -62,6 +62,37 @@ class Planet extends BaseEntity
     
     public function update()
     {
-        
+        $prod = array(60, 30);
+        $energy = 0;
+        $conso = 0;
+
+        $buildings = $this->getBuildings();
+        foreach ($buildings as $l) {
+            $level = $l->getLevel();
+            $building = $l->getBuilding();
+            if (empty($building)) {
+                continue;
+            }
+
+            $p = $building->getProductionForLevel($level);
+            foreach ($p as $i => $v) {
+                $prod[$i] += $v;
+            }
+
+            $energy += $building->getEnergyForLevel($level);
+            $conso += $building->getConsumptionForLevel($level);
+        }
+
+        $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
+
+        $hours = (time() - $this->updated->getTimestamp()) / 3600;
+        $gain = array(
+            $prod[0] * $factor * $hours,
+            $prod[1] * $factor * $hours,
+        );
+
+        $this->setResource1($this->getResource1() + $gain[0]);
+        $this->setResource2($this->getResource2() + $gain[1]);
+        $this->setUpdated(new \DateTime('now'));
     }
 }

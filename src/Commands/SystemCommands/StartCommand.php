@@ -35,7 +35,7 @@ class StartCommand extends SystemCommand
 
         // Check if the player does not already have an account
         $em = TriviDB::getEntityManager();
-        $existing = $em->getRepository('TriviWars\\Entity\\Player')->find($user_id);
+        $existing = $em->getRepository('TW:Player')->find($user_id);
         if (!empty($existing))
         {
             return Req::error($chat_id, 'You already have a game started');
@@ -47,6 +47,9 @@ class StartCommand extends SystemCommand
         $planet = new Planet();
         $planet->setPlayer($player);
         $planet->setName('Planet '.rand(100, 999));
+        $planet->setResource1(500);
+        $planet->setResource2(400);
+        $planet->setUpdated(new \DateTime('now'));
         $em->persist($player);
         $em->persist($planet);
         $em->flush();
@@ -55,7 +58,7 @@ class StartCommand extends SystemCommand
         $text = '📨 *New message received*' . "\n\n" .
             'Hello '.$username.'!' . "\n\n" .
             'You have been selected to be the leader of a new colony on '.$planet->getName().'. Congratulations!' . "\n" .
-            'We sent you 💰100, 🌽100, 💎100, and 👨40 to help you start your colony.' . "\n" .
+            'We sent you 💰'.$planet->getResource1().', 🌽'.$planet->getResource2().' to help you start your colony.' . "\n" .
             'Make good use of it!' . "\n\n" .
             'Regards,' . "\n" .
             'CyberCorp Corporation' . "\n\n" .

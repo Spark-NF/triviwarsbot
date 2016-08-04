@@ -33,6 +33,8 @@ class StatusCommand extends UserCommand
         $em = TriviDB::getEntityManager();
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
         $planet->update();
+        $em->merge($planet);
+        $em->flush();
 
         // Get production and consumption of all buildings
         $prod = array(60, 30);
@@ -55,10 +57,13 @@ class StatusCommand extends UserCommand
             $conso += $building->getConsumptionForLevel($level);
         }
 
+        // Energy factor
+        $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
+
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
-            '💰 100 ('.$prod[0].'/h)' . "\n" .
-            '🌽 100 ('.$prod[1].'/h)' . "\n" .
-            '⚡ '.$conso.'/'.$energy . "\n\n" .
+            '💰 '.floor($planet->getResource1()).' ('.($prod[0] * $factor).'/h)' . "\n" .
+            '🌽 '.floor($planet->getResource2()).' ('.($prod[1] * $factor).'/h)' . "\n" .
+            '⚡ '.$conso.'/'.$energy . ($factor < 1 ? ' ('.round($factor * 100).'%)' : '') . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';
