@@ -3,12 +3,8 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use TriviWars\Req;
 use Longman\TelegramBot\Commands\UserCommand;
-use Longman\TelegramBot\DB;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
-use Longman\TelegramBot\Request;
 use TriviWars\DB\TriviDB;
-use TriviWars\Entity\Planet;
-use TriviWars\Entity\Player;
 
 /**
  * Status command
@@ -33,21 +29,45 @@ class StatusCommand extends UserCommand
         $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
 
+        // Get current planet
         $em = TriviDB::getEntityManager();
-        $planet = $em->getRepository('TriviWars\\Entity\\Planet')->findOneBy(array('player' => $em->getReference('TriviWars\\Entity\\Player', $user_id)));
+        $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
+        $planet->update();
+
+        // Get production and consumption of all buildings
+        $prod = array(60, 30);
+        $energy = 0;
+        $conso = 0;
+        $buildings = $planet->getBuildings();
+        foreach ($buildings as $l) {
+            $level = $l->getLevel();
+            $building = $l->getBuilding();
+            if (empty($building)) {
+                continue;
+            }
+
+            $p = $building->getProductionForLevel($level);
+            foreach ($p as $i => $v) {
+                $prod[$i] += $v;
+            }
+
+            $energy += $building->getEnergyForLevel($level);
+            $conso += $building->getConsumptionForLevel($level);
+        }
 
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
-            '💰 100 (2/h)' . "\n" .
-            '🌽 100 (2/h)' . "\n" .
-            '💎 100 (2/h)' . "\n" .
-            '⚡ 40 (1/h)' . "\n\n" .
+            '💰 100 ('.$prod[0].'/h)' . "\n" .
+            '🌽 100 ('.$prod[1].'/h)' . "\n" .
+            '⚡ '.$conso.'/'.$energy . "\n\n" .
             'Constructions: _N/A_' . "\n" .
             'Research: _N/A_' . "\n" .
             'Shipyard: _N/A_';
 
-        $keyboard[] = ['🏭 Buildings', '💊 Research', '🚀 Shipyard'];
-        $keyboard[] = ['🛡 Defense', '⚔ Fleet', '🌟 Galaxy'];
-        $keyboard[] = ['🔃 Switch', '🔧 Manage'];
+        $keyboard = [
+            ['🏭 Buildings', '💊 Research', '🚀 Shipyard'],
+            ['🛡 Defense', '⚔ Fleet', '🌟 Galaxy'],
+            ['🔃 Switch', '🔧 Manage'],
+        ];
 
         $markup = new ReplyKeyboardMarkup([
             'keyboard'          => $keyboard,
@@ -56,11 +76,6 @@ class StatusCommand extends UserCommand
             'selective'         => false
         ]);
 
-        return Request::sendMessage([
-            'reply_markup'  => $markup,
-            'chat_id'       => $chat_id,
-            'parse_mode'    => 'MARKDOWN',
-            'text'          => $text,
-        ]);
+        return Req::send($chat_id, $text, $markup);
     }
 }

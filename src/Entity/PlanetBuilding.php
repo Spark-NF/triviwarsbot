@@ -26,7 +26,7 @@ class PlanetBuilding extends BaseEntity
 
     /**
      * @var Building
-     * @ORM\ManyToOne(targetEntity="Building", fetch="LAZY")
+     * @ORM\ManyToOne(targetEntity="Building", fetch="EAGER")
      * @ORM\JoinColumn(name="building_id", referencedColumnName="id")
      **/
     protected $building;

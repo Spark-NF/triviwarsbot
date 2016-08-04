@@ -1,6 +1,7 @@
 <?php
 namespace TriviWars\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -29,4 +30,38 @@ class Planet extends BaseEntity
      * @ORM\JoinColumn(name="player_id", referencedColumnName="id")
      **/
     protected $player;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $updated;
+
+    /**
+     * @var float
+     * @ORM\Column(name="resource_1", type="float", nullable=false)
+     **/
+    protected $resource1;
+
+    /**
+     * @var float
+     * @ORM\Column(name="resource_2", type="float", nullable=false)
+     **/
+    protected $resource2;
+
+    /**
+     * @var PlanetBuilding[]
+     * @ORM\OneToMany(targetEntity="PlanetBuilding", mappedBy="planet")
+     */
+    protected $buildings;
+
+    public function __construct()
+    {
+        $this->buildings = new ArrayCollection();
+    }
+    
+    public function update()
+    {
+        
+    }
 }
