@@ -117,8 +117,8 @@ class BuildCommand extends UserCommand
             $name = $building->getName().' ('.($currentLevel + 1).')';
 
             // Production
-            $production  = $this->displayUnit('💰', $prod[0], $prodCurrent[0]);
-            $production .= $this->displayUnit('🌽', $prod[1], $prodCurrent[1]);
+            $production  = $this->displayUnit('💰', $prod[0], $prodCurrent[0], 'h');
+            $production .= $this->displayUnit('🌽', $prod[1], $prodCurrent[1], 'h');
             $production .= $this->displayUnit('⚡', $energy, $energyCurrent);
 
             // Price
@@ -126,7 +126,11 @@ class BuildCommand extends UserCommand
             $cost .= $this->displayUnit('🌽', $price[1]);
             $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
 
-            $text .= $name . (!empty($production) ? ' - '.$production : '') . "\n" . $cost;
+            $text .= $name;
+            if (!empty($production)) {
+                $text .= "\n" . '- Production: '.$production;
+            }
+            $text .= "\n" . '- Cost: ' . $cost;
         }
 
         // Generate keyboard with 3 buildings per line
@@ -155,11 +159,11 @@ class BuildCommand extends UserCommand
         return Req::send($chat_id, $text, $markup);
     }
 
-    protected function displayUnit($unit, $prod, $current = null)
+    protected function displayUnit($unit, $prod, $current = null, $period = null)
     {
         $ret = '';
         if (!empty($prod)) {
-            $ret .= ' '.$unit.$prod;
+            $ret .= ' '.$unit.$prod.(!empty($period) ? '/'.$period : '');
             if ($current !== null) {
                 if ($prod != $current) {
                     $ret .= ' (+'.($prod - $current).')';
