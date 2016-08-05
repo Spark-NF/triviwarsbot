@@ -49,12 +49,6 @@ class BuildCommand extends UserCommand
                 return $this->telegram->executeCommand('status');
             }
 
-            // Cannot build too many buildings at once
-            $countConstructions = count($planet->getConstructionBuildings());
-            if ($countConstructions >= $planet->getMaxConstructions()) {
-                return Req::error($chat_id, 'You reached your concurrent building limit');
-            }
-
             // Get buildings
             $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
@@ -65,6 +59,12 @@ class BuildCommand extends UserCommand
             $constructionBuilding = $em->getRepository('TW:ConstructionBuilding')->findOneBy(array('planet' => $planet, 'building' => $building));
             if (!empty($constructionBuilding)) {
                 return Req::error($chat_id, 'This building is already under construction');
+            }
+
+            // Cannot build too many buildings at once
+            $countConstructions = count($planet->getConstructionBuildings());
+            if ($countConstructions >= $planet->getMaxConstructions()) {
+                return Req::error($chat_id, 'You reached your concurrent building limit');
             }
 
             // Get current building level or create it if not found
