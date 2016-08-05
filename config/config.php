@@ -39,4 +39,5 @@ return [
         63496576, // SparkNF
         51336466, // lelimacon
     ],
+    'botan_token' => '0SL9bwRJAWUYRAxihM4KoEMTnGKT4NhN',
 ];

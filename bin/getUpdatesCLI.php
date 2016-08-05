@@ -3,10 +3,10 @@
 require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
-use TriviWars\DB\MyTelegram;
+use TriviWars\Telegram;
 
 try {
-    $telegram = new MyTelegram($config);
+    $telegram = new Telegram($config);
 
     // Handle telegram getUpdate request
     $ServerResponse = $telegram->handleGetUpdates();

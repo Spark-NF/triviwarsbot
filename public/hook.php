@@ -2,10 +2,10 @@
 require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
-use TriviWars\DB\MyTelegram;
+use TriviWars\Telegram;
 
 try {
-    $telegram = new MyTelegram($config);
+    $telegram = new Telegram($config);
     $telegram->handle();
 } catch (Longman\TelegramBot\Exception\TelegramException $e) {
     // Silence is gold!

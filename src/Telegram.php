@@ -1,14 +1,13 @@
 <?php
-namespace TriviWars\DB;
+namespace TriviWars;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Driver\PDOMySql\Driver as PDOMySqlDriver;
 use TriviWars\DB\TriviDB;
-use Longman\TelegramBot\Telegram;
 
-class MyTelegram extends Telegram
+class Telegram extends \Longman\TelegramBot\Telegram
 {
     public function __construct($config)
     {
@@ -55,7 +54,9 @@ class MyTelegram extends Telegram
         $telegram->setUploadPath('../Upload');*/
 
         // Botan.io integration
-        //$telegram->enableBotan('your_token');
+        if (!empty($config['botan_token'])) {
+            $this->enableBotan('botan_token');
+        }
     }
 
     public function getPDO()
