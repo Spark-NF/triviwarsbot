@@ -27,11 +27,16 @@ class SwitchCommand extends UserCommand
         $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
 
-        $conversation = new Conversation($user_id, $chat_id, 'switch');
-        $em = TriviDB::getEntityManager();
-
         // Get all player's planets
+        $em = TriviDB::getEntityManager();
         $planets = $em->getRepository('TW:Planet')->findBy(array('player' => $em->getReference('TW:Player', $user_id)));
+
+        // You cannot switch to other planets if you only have one
+        if (count($planets) == 1) {
+            return Req::error($chat_id, 'You only have one planet');
+        }
+
+        $conversation = new Conversation($user_id, $chat_id, 'switch');
 
         // If the command is not for the list, it's an upgrade
         $command = trim($message->getText(true));
