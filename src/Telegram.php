@@ -55,7 +55,7 @@ class Telegram extends \Longman\TelegramBot\Telegram
 
         // Botan.io integration
         if (!empty($config['botan_token'])) {
-            $this->enableBotan('botan_token');
+            $this->enableBotan($config['botan_token']);
         }
     }
 
