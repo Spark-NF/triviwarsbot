@@ -1,11 +1,8 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
-use TriviWars\Entity\ConstructionBuilding;
-use TriviWars\Entity\Planet;
 use TriviWars\Req;
 use TriviWars\DB\TriviDB;
-use TriviWars\Entity\PlanetBuilding;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\ReplyKeyboardMarkup;
 use Longman\TelegramBot\Conversation;
