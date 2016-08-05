@@ -68,18 +68,34 @@ class StatusCommand extends UserCommand
             $constructions[] = $c->getBuilding()->getName().' ('.$c->getRemainingTime(time()).')';
         }
 
+        $researchs = [];
+        $ships = [];
+
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
             '💰 '.number_format(floor($planet->getResource1())).' ('.number_format($prod[0] * $factor).'/h)' . "\n" .
             '🌽 '.number_format(floor($planet->getResource2())).' ('.number_format($prod[1] * $factor).'/h)' . "\n" .
-            '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n" .
-            'Constructions: ' . (empty($constructions) ? '_N/A_' : implode(', ', $constructions)) . "\n" .
-            'Research: _N/A_' . "\n" .
-            'Shipyard: _N/A_';
+            '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n";
+        $text .= '*Constructions* ('.count($constructions).'/'.$planet->getMaxConstructions().')';
+        if (empty($constructions)) {
+            $text .= ': _N/A_';
+        } else {
+            foreach ($constructions as $construction) {
+                $text .= "\n" . '- '.$construction;
+            }
+        }
+        if (!empty($constructions) || !empty($researchs)) {
+            $text .= "\n";
+        }
+        $text .= "\n" . 'Research: _N/A_';
+        if (!empty($researchs) || !empty($ships)) {
+            $text .= "\n";
+        }
+        $text .= "\n" . 'Shipyard: _N/A_';
 
         $keyboard = [
             ['🏭 Buildings', '💊 Research', '🚀 Shipyard'],
             ['🛡 Defense', '⚔ Fleet', '🌟 Galaxy'],
-            ['🔃 Switch', '🔧 Manage'],
+            ['🔃 Refresh', '🌍 Switch', '🔧 Manage'],
         ];
 
         $markup = new ReplyKeyboardMarkup([
@@ -90,5 +106,20 @@ class StatusCommand extends UserCommand
         ]);
 
         return Req::send($chat_id, $text, $markup);
+    }
+
+    private function showList()
+    {
+        $ret = '';
+        if (empty($constructions)) {
+            $ret .= ': _N/A_';
+        } else {
+            foreach ($constructions as $construction) {
+                $ret .= "\n" . '- '.$construction;
+            }
+        }
+        if (!empty($constructions) || !empty($researchs)) {
+            $ret .= "\n";
+        }
     }
 }

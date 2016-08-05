@@ -107,15 +107,18 @@ class Planet extends BaseEntity
 
     protected function updateBetween($from, $to)
     {
+        // If for some reason an already finished upgrade is started, we ignore it
         $diff = $to - $from;
         if ($diff < 0) {
             return;
         }
 
+        // Initial resource production
         $prod = array(60, 30);
         $energy = 0;
         $conso = 0;
 
+        // Update resource production from planet's buildings
         $buildings = $this->getBuildings();
         foreach ($buildings as $l) {
             $level = $l->getLevel();
@@ -133,6 +136,7 @@ class Planet extends BaseEntity
             $conso += $building->getConsumptionForLevel($level);
         }
 
+        // If we use more energy than we have, all productions are reduced by this factor
         $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
 
         $hours = $diff / 3600;
@@ -151,7 +155,7 @@ class Planet extends BaseEntity
     public function canPay($price)
     {
         return $this->getResource1() >= $price[0]
-        && $this->getResource2() >= $price[1];
+            && $this->getResource2() >= $price[1];
     }
 
     /**
@@ -170,5 +174,13 @@ class Planet extends BaseEntity
     {
         $this->setResource1($this->getResource1() + $gain[0]);
         $this->setResource2($this->getResource2() + $gain[1]);
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxConstructions()
+    {
+        return 2;
     }
 }

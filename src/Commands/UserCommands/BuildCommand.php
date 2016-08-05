@@ -49,6 +49,12 @@ class BuildCommand extends UserCommand
                 return $this->telegram->executeCommand('status');
             }
 
+            // Cannot build too many buildings at once
+            $countConstructions = count($planet->getConstructionBuildings());
+            if ($countConstructions >= $planet->getMaxConstructions()) {
+                return Req::error($chat_id, 'You reached your concurrent building limit');
+            }
+
             // Get buildings
             $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
@@ -90,11 +96,14 @@ class BuildCommand extends UserCommand
             $construction->setFinish(new \DateTime(date('c', time() + $duration)));
             $em->persist($construction);
 
+            $planet->addConstructionBuilding($construction);
+            $em->merge($planet);
+
             $em->flush();
 
             $conversation->stop();
 
-            Req::success($chat_id, 'Up '.$building->getName());
+            Req::success($chat_id, 'Started upgrading '.$building->getName());
             return $this->telegram->executeCommand('status');
         }
 
@@ -172,8 +181,8 @@ class BuildCommand extends UserCommand
         $markup = new ReplyKeyboardMarkup([
             'keyboard'          => $keyboard,
             'resize_keyboard'   => true,
-            'one_time_keyboard' => true,
-            'selective'         => false
+            'one_time_keyboard' => false,
+            'selective'         => false,
         ]);
         return Req::send($chat_id, $text, $markup);
     }

@@ -34,8 +34,10 @@ class GenericmessageCommand extends SystemCommand
         }
         
         $assoc = [
-            '🏭 Buildings' => 'build',
-            '🔙 Back' => 'status',
+            '🏭 Buildings'  => 'build',
+            '🔙 Back'       => 'status',
+            '🔃 Refresh'    => 'status',
+            '🌍 Switch'     => 'switch',
         ];
         
         $msg = $message->getText();
