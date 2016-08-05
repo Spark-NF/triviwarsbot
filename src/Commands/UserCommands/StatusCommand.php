@@ -33,7 +33,7 @@ class StatusCommand extends UserCommand
         // Get current planet
         $em = TriviDB::getEntityManager();
         /** @var Planet $planet */
-        $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id)));
+        $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id), 'active' => true));
         $planet->update($em);
         $em->merge($planet);
         $em->flush();

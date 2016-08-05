@@ -47,6 +47,7 @@ class StartCommand extends SystemCommand
         $planet = new Planet();
         $planet->setPlayer($player);
         $planet->setName('Planet '.rand(100, 999));
+        $planet->setActive(true);
         $planet->setResource1(500);
         $planet->setResource2(400);
         $planet->setUpdated(new \DateTime('now'));

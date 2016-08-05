@@ -51,7 +51,15 @@ class SwitchCommand extends UserCommand
                 return Req::error($chat_id, 'Invalid planet name');
             }
 
-            // TODO: switch to planet
+            // De-active all player's planets
+            $em->createQuery('UPDATE TW:Planet p SET p.active = false WHERE p.player = :player')
+                ->setParameter('player', $em->getReference('TW:Player', $user_id))
+                ->execute();
+
+            // Set new planet as active
+            $planet->setActive(true);
+            $em->merge($planet);
+            $em->flush();
 
             $conversation->stop();
 
@@ -63,7 +71,9 @@ class SwitchCommand extends UserCommand
 
         $keyboard = [];
         foreach ($planets as $planet) {
-            $keyboard[] = [$planet->getName()];
+            if (!$planet->isActive()) {
+                $keyboard[] = [$planet->getName()];
+            }
         }
         $keyboard[] = ['🔙 Back'];
 

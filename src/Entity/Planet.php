@@ -39,6 +39,12 @@ class Planet extends BaseEntity
     protected $updated;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    protected $active;
+
+    /**
      * @var float
      * @ORM\Column(name="resource_1", type="float", nullable=false)
      **/
