@@ -3,7 +3,6 @@ namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use TriviWars\Req;
 use Longman\TelegramBot\Commands\SystemCommand;
-use Longman\TelegramBot\Request;
 use TriviWars\DB\TriviDB;
 use TriviWars\Entity\Planet;
 use TriviWars\Entity\Player;
@@ -65,10 +64,7 @@ class StartCommand extends SystemCommand
             'CyberCorp Corporation' . "\n\n" .
             '_PS: if you\'re ever lost, remember you can type_ /help _to see all commands!_';
 
-        return Request::sendMessage([
-            'chat_id'       => $chat_id,
-            'parse_mode'    => 'MARKDOWN',
-            'text'          => $text,
-        ]);
+        Req::send($chat_id, $text);
+        return $this->telegram->executeCommand('status');
     }
 }
