@@ -119,7 +119,7 @@ class BuildCommand extends UserCommand
 
         // Get buildings and their levels
         /** @var Building[] $buildings */
-        $buildings = $em->getRepository('TW:Building')->findAll();
+        $buildings = $em->getRepository('TW:Building')->findBy([], ['order' => 'ASC']);
         $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
         $levels = [];
         foreach ($planetBuildings as $building) {
@@ -154,15 +154,24 @@ class BuildCommand extends UserCommand
             $prodCurrent = $building->getProductionForLevel($currentLevel);
             $energy = $building->getEnergyForLevel($currentLevel + 1);
             $energyCurrent = $building->getEnergyForLevel($currentLevel);
+            $storage = $building->getStorageForLevel($currentLevel + 1);
+            $storageCurrent = $building->getStorageForLevel($currentLevel);
 
             // Production
             $production  = $this->displayUnit('💰', $prod[0], $prodCurrent[0], 'h');
             $production .= $this->displayUnit('🌽', $prod[1], $prodCurrent[1], 'h');
+            $production .= $this->displayUnit('💎', $prod[2], $prodCurrent[2], 'h');
             $production .= $this->displayUnit('⚡', $energy, $energyCurrent);
+
+            // Storage
+            $store  = $this->displayUnit('💰', $storage[0], $storageCurrent[0]);
+            $store .= $this->displayUnit('🌽', $storage[1], $storageCurrent[1]);
+            $store .= $this->displayUnit('💎', $storage[2], $storageCurrent[2]);
 
             // Price
             $cost  = $this->displayUnit('💰', $price[0]);
             $cost .= $this->displayUnit('🌽', $price[1]);
+            $cost .= $this->displayUnit('💎', $price[2]);
             $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
 
             $text .= '*'.$building->getName().'*';
@@ -173,6 +182,9 @@ class BuildCommand extends UserCommand
             }
             if (!empty($production)) {
                 $text .= "\n" . '- Production:'.$production;
+            }
+            if (!empty($store)) {
+                $text .= "\n" . '- Storage:'.$store;
             }
             $text .= "\n" . '- Cost:' . $cost;
         }
@@ -207,10 +219,10 @@ class BuildCommand extends UserCommand
     {
         $ret = '';
         if (!empty($prod)) {
-            $ret .= ' '.$unit.$prod.(!empty($period) ? '/'.$period : '');
+            $ret .= ' ' . $unit . number_format($prod) . (!empty($period) ? '/' . $period : '');
             if ($current !== null) {
                 if ($prod != $current) {
-                    $ret .= ' (+'.($prod - $current).')';
+                    $ret .= ' (+' . number_format($prod - $current) . ')';
                 } else {
                     $ret .= ' (=)';
                 }

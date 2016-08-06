@@ -57,6 +57,12 @@ class Planet extends BaseEntity
     protected $resource2;
 
     /**
+     * @var float
+     * @ORM\Column(name="resource_3", type="float", nullable=false)
+     **/
+    protected $resource3;
+
+    /**
      * @var PlanetBuilding[]
      * @ORM\OneToMany(targetEntity="PlanetBuilding", mappedBy="planet")
      */
@@ -73,6 +79,65 @@ class Planet extends BaseEntity
     {
         $this->buildings = new ArrayCollection();
         $this->constructionBuildings = new ArrayCollection();
+    }
+
+    public function getHourlyProduction()
+    {
+        // Initial resource production
+        $prod = [60, 30, 0];
+        $energy = 0;
+        $conso = 0;
+
+        $buildings = $this->getBuildings();
+        foreach ($buildings as $l) {
+            $level = $l->getLevel();
+            $building = $l->getBuilding();
+            if (empty($building)) {
+                continue;
+            }
+
+            $p = $building->getProductionForLevel($level);
+            foreach ($p as $i => $v) {
+                $prod[$i] += $v;
+            }
+
+            $energy += $building->getEnergyForLevel($level);
+            $conso += $building->getConsumptionForLevel($level);
+        }
+
+        // If we use more energy than we have, all productions are reduced by this factor
+        $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
+
+        return [
+            $prod[0] * $factor,
+            $prod[1] * $factor,
+            $prod[2] * $factor,
+        ];
+    }
+
+    public function getMaxResources()
+    {
+        $storage = [0, 0, 0];
+
+        $buildings = $this->getBuildings();
+        foreach ($buildings as $l) {
+            $level = $l->getLevel();
+            $building = $l->getBuilding();
+            if (empty($building)) {
+                continue;
+            }
+
+            $p = $building->getStorageForLevel($level);
+            foreach ($p as $i => $v) {
+                $storage[$i] += $v;
+            }
+        }
+
+        foreach ($storage as $i => &$v) {
+            $v = max(10000, $v);
+        }
+
+        return $storage;
     }
 
     /**
@@ -93,7 +158,7 @@ class Planet extends BaseEntity
             $from = $to;
 
             // Increase building level
-            $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(array('planet' => $this, 'building' => $c->getBuilding()));
+            $planetBuilding = $em->getRepository('TW:PlanetBuilding')->findOneBy(['planet' => $this, 'building' => $c->getBuilding()]);
             if (empty($planetBuilding)) {
                 $planetBuilding = new PlanetBuilding();
                 $planetBuilding->setBuilding($c->getBuilding());
@@ -119,37 +184,13 @@ class Planet extends BaseEntity
             return;
         }
 
-        // Initial resource production
-        $prod = array(60, 30);
-        $energy = 0;
-        $conso = 0;
-
-        // Update resource production from planet's buildings
-        $buildings = $this->getBuildings();
-        foreach ($buildings as $l) {
-            $level = $l->getLevel();
-            $building = $l->getBuilding();
-            if (empty($building)) {
-                continue;
-            }
-
-            $p = $building->getProductionForLevel($level);
-            foreach ($p as $i => $v) {
-                $prod[$i] += $v;
-            }
-
-            $energy += $building->getEnergyForLevel($level);
-            $conso += $building->getConsumptionForLevel($level);
-        }
-
-        // If we use more energy than we have, all productions are reduced by this factor
-        $factor = $conso == 0 ? 0 : min(1, $energy / $conso);
-
+        $prod = $this->getHourlyProduction();
         $hours = $diff / 3600;
-        $gain = array(
-            $prod[0] * $factor * $hours,
-            $prod[1] * $factor * $hours,
-        );
+        $gain = [
+            $prod[0] * $hours,
+            $prod[1] * $hours,
+            $prod[2] * $hours,
+        ];
 
         $this->gain($gain);
     }
@@ -161,7 +202,8 @@ class Planet extends BaseEntity
     public function canPay($price)
     {
         return $this->getResource1() >= $price[0]
-            && $this->getResource2() >= $price[1];
+            && $this->getResource2() >= $price[1]
+            && $this->getResource3() >= $price[2];
     }
 
     /**
@@ -169,8 +211,9 @@ class Planet extends BaseEntity
      */
     public function pay($price)
     {
-        $this->setResource1($this->getResource1() - $price[0]);
-        $this->setResource2($this->getResource2() - $price[1]);
+        $this->setResource1(max(0, $this->getResource1() - $price[0]));
+        $this->setResource2(max(0, $this->getResource2() - $price[1]));
+        $this->setResource3(max(0, $this->getResource3() - $price[2]));
     }
 
     /**
@@ -178,8 +221,10 @@ class Planet extends BaseEntity
      */
     public function gain($gain)
     {
-        $this->setResource1($this->getResource1() + $gain[0]);
-        $this->setResource2($this->getResource2() + $gain[1]);
+        $max = $this->getMaxResources();
+        $this->setResource1(min($max[0], $this->getResource1() + $gain[0]));
+        $this->setResource2(min($max[1], $this->getResource2() + $gain[1]));
+        $this->setResource3(min($max[2], $this->getResource3() + $gain[2]));
     }
 
     /**

@@ -49,6 +49,7 @@ class StartCommand extends SystemCommand
         $planet->setActive(true);
         $planet->setResource1(500);
         $planet->setResource2(400);
+        $planet->setResource3(0);
         $planet->setUpdated(new \DateTime('now'));
         $em->persist($player);
         $em->persist($planet);

@@ -72,9 +72,12 @@ class StatusCommand extends UserCommand
             $constructions[] = $c->getBuilding()->getName().' ('.Building::durationToString($c->getRemainingTime(time())).')';
         }
 
+        $max = $planet->getMaxResources();
+
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
-            '💰 '.number_format(floor($planet->getResource1())).' ('.number_format($prod[0] * $factor).'/h)' . "\n" .
-            '🌽 '.number_format(floor($planet->getResource2())).' ('.number_format($prod[1] * $factor).'/h)' . "\n" .
+            $this->showResource('💰', $planet->getResource1(), $max[0], $prod[0] * $factor, 'h') . "\n" .
+            $this->showResource('🌽', $planet->getResource2(), $max[1], $prod[1] * $factor, 'h') . "\n" .
+            $this->showResource('💎', $planet->getResource3(), $max[2], $prod[2] * $factor, 'h') . "\n" .
             '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n" .
             $this->showList('Constructions', $constructions, $planet->getMaxConstructions(), $researchs) . "\n" .
             $this->showList('Research', $researchs, 0, $ships) . "\n" .
@@ -95,6 +98,15 @@ class StatusCommand extends UserCommand
         ]);
 
         return Req::send($chat_id, $text, $markup);
+    }
+
+    private function showResource($icon, $value, $max, $production, $period)
+    {
+        $ret  = $icon . ' ';
+        $ret .= number_format(floor($value)) . '/' . number_format($max);
+        $ret .= ' (' . number_format($production) . '/' . $period . ')';
+
+        return $ret;
     }
 
     private function showList($name, $list, $max, $next = [])

@@ -51,6 +51,18 @@ class Building extends BaseEntity
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
+    protected $cost_3_a;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
+     **/
+    protected $cost_3_b;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
+     **/
     protected $consumption_a;
 
     /**
@@ -85,6 +97,18 @@ class Building extends BaseEntity
 
     /**
      * @var float
+     * @ORM\Column(type="float", nullable=false)
+     **/
+    protected $production_3_a;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", nullable=false)
+     **/
+    protected $production_3_b;
+
+    /**
+     * @var float
      * @ORM\Column(name="production_energy_a", type="float", nullable=false)
      **/
     protected $productionEnergyA;
@@ -95,11 +119,45 @@ class Building extends BaseEntity
      **/
     protected $productionEnergyB;
 
+    /**
+     * @var float
+     * @ORM\Column(name="storage_1", type="float", nullable=false)
+     **/
+    protected $storage1;
+
+    /**
+     * @var float
+     * @ORM\Column(name="storage_2", type="float", nullable=false)
+     **/
+    protected $storage2;
+
+    /**
+     * @var float
+     * @ORM\Column(name="storage_3", type="float", nullable=false)
+     **/
+    protected $storage3;
+
+    /**
+     * @var int
+     * @ORM\Column(type="integer", nullable=false)
+     **/
+    protected $order;
+
+    public function getStorageForLevel($level)
+    {
+        return [
+            $this->storage1 * floor(2.5 * exp((20 * $level) / 33)),
+            $this->storage2 * floor(2.5 * exp((20 * $level) / 33)),
+            $this->storage3 * floor(2.5 * exp((20 * $level) / 33)),
+        ];
+    }
+
     public function getPriceForLevel($level)
     {
         return [
             floor($this->cost_1_a * pow($this->cost_1_b, $level - 1)),
             floor($this->cost_2_a * pow($this->cost_2_b, $level - 1)),
+            floor($this->cost_3_a * pow($this->cost_3_b, $level - 1)),
         ];
     }
 
@@ -113,6 +171,7 @@ class Building extends BaseEntity
         return [
             floor($this->production_1_a * $level * pow($this->production_1_b, $level)),
             floor($this->production_2_a * $level * pow($this->production_2_b, $level)),
+            floor($this->production_3_a * $level * pow($this->production_3_b, $level)),
         ];
     }
 
@@ -126,7 +185,7 @@ class Building extends BaseEntity
         $price = $this->getPriceForLevel($level);
 
         // Formula for duration in hours
-        $duration = ($price[0] + $price[1]) / (2500);
+        $duration = ($price[0] + $price[1] + $price[2]) / (2500);
         $duration *= 3600;
 
         return $duration;
