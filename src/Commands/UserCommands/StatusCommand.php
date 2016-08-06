@@ -29,9 +29,9 @@ class StatusCommand extends UserCommand
         $message = $this->getMessage();
         $user_id = $message->getFrom()->getId();
         $chat_id = $message->getChat()->getId();
+        $em = TriviDB::getEntityManager();
 
         // Get current planet
-        $em = TriviDB::getEntityManager();
         /** @var Planet $planet */
         $planet = $em->getRepository('TW:Planet')->findOneBy(array('player' => $em->getReference('TW:Player', $user_id), 'active' => true));
         $planet->update($em);
@@ -64,33 +64,21 @@ class StatusCommand extends UserCommand
 
         // Constructions
         $constructions = [];
+        $researchs = [];
+        $ships = [];
+        $defenses = [];
         foreach ($planet->getConstructionBuildings() as $c) {
             $constructions[] = $c->getBuilding()->getName().' ('.$c->getRemainingTime(time()).')';
         }
 
-        $researchs = [];
-        $ships = [];
-
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
             '💰 '.number_format(floor($planet->getResource1())).' ('.number_format($prod[0] * $factor).'/h)' . "\n" .
             '🌽 '.number_format(floor($planet->getResource2())).' ('.number_format($prod[1] * $factor).'/h)' . "\n" .
-            '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n";
-        $text .= '*Constructions* ('.count($constructions).'/'.$planet->getMaxConstructions().')';
-        if (empty($constructions)) {
-            $text .= ': _N/A_';
-        } else {
-            foreach ($constructions as $construction) {
-                $text .= "\n" . '- '.$construction;
-            }
-        }
-        if (!empty($constructions) || !empty($researchs)) {
-            $text .= "\n";
-        }
-        $text .= "\n" . 'Research: _N/A_';
-        if (!empty($researchs) || !empty($ships)) {
-            $text .= "\n";
-        }
-        $text .= "\n" . 'Shipyard: _N/A_';
+            '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n" .
+            $this->showList('Constructions', $constructions, $planet->getMaxConstructions(), $researchs) . "\n" .
+            $this->showList('Research', $researchs, 0, $ships) . "\n" .
+            $this->showList('Shipyard', $ships, 0, $defenses) . "\n" .
+            $this->showList('Defense', $defenses, 0);
 
         $keyboard = [
             ['🏭 Buildings', '💊 Research', '🚀 Shipyard'],
@@ -108,18 +96,26 @@ class StatusCommand extends UserCommand
         return Req::send($chat_id, $text, $markup);
     }
 
-    private function showList()
+    private function showList($name, $list, $max, $next = [])
     {
-        $ret = '';
-        if (empty($constructions)) {
-            $ret .= ': _N/A_';
-        } else {
-            foreach ($constructions as $construction) {
-                $ret .= "\n" . '- '.$construction;
+        // Title
+        $ret = '*' . $name . '*';
+
+        // Count and limit
+        $ret .= ' (' . count($list) . (!empty($max) ? '/' . $max : '') . ')';
+
+        // Actual list
+        if (!empty($list)) {
+            foreach ($list as $item) {
+                $ret .= "\n" . '- ' . $item;
             }
         }
-        if (!empty($constructions) || !empty($researchs)) {
+
+        // If there is a non-empty list afterwards, add a separator
+        if (!empty($list) || !empty($next)) {
             $ret .= "\n";
         }
+
+        return $ret;
     }
 }
