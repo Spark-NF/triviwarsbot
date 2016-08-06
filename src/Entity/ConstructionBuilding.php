@@ -38,6 +38,12 @@ class ConstructionBuilding extends BaseEntity
     protected $level;
 
     /**
+     * @var int
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    protected $duration;
+
+    /**
      * @var \DateTime
      * @ORM\Column(type="datetime", nullable=false)
      */

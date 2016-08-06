@@ -32,4 +32,9 @@ class Req
     {
         return Request::emptyResponse();
     }
+
+    public static function debug($chat_id, $object)
+    {
+        return self::send($chat_id, var_export($object, true));
+    }
 }

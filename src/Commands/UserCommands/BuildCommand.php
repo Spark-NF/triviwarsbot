@@ -88,12 +88,23 @@ class BuildCommand extends UserCommand
             $duration = ($price[0] + $price[1]) / (2500);
             $duration *= 3600;
 
+            // Find the end of the first building
+            $lastBuilding = new \DateTime($em->createQueryBuilder()
+                ->select('MAX(b.finish)')
+                ->from('TW:ConstructionBuilding', 'b')
+                ->where('b.planet = :planet')
+                ->setParameter('planet', $planet)
+                ->getQuery()
+                ->getSingleScalarResult());
+            $finish = new \DateTime(date('c', $lastBuilding->getTimestamp() + $duration));
+
             // Update building level
             $construction = new ConstructionBuilding();
             $construction->setPlanet($planet);
             $construction->setBuilding($building);
             $construction->setLevel($planetBuilding->getLevel() + 1);
-            $construction->setFinish(new \DateTime(date('c', time() + $duration)));
+            $construction->setDuration($duration);
+            $construction->setFinish($finish);
             $em->persist($construction);
 
             $planet->addConstructionBuilding($construction);
