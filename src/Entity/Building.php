@@ -120,4 +120,37 @@ class Building extends BaseEntity
     {
         return floor($this->productionEnergyA * $level * pow($this->productionEnergyB, $level));
     }
+
+    public function getDurationForLevel($level)
+    {
+        $price = $this->getPriceForLevel($level);
+
+        // Formula for duration in hours
+        $duration = ($price[0] + $price[1]) / (2500);
+        $duration *= 3600;
+
+        return $duration;
+    }
+
+    public static function durationToString($duration)
+    {
+        $ret = '';
+        if ($duration > 24 * 3600) {
+            $days = floor($duration / (24 * 3600));
+            $duration -= $days * 24 * 3600;
+            $ret .= $days.'d';
+        }
+        if ($duration > 3600) {
+            $hours = floor($duration / 3600);
+            $duration -= $hours * 3600;
+            $ret .= $hours.'h';
+        }
+        if ($duration > 60) {
+            $mins = floor($duration / 60);
+            $duration -= $mins * 60;
+            $ret .= $mins.'m';
+        }
+        $ret .= floor($duration).'s';
+        return $ret;
+    }
 }

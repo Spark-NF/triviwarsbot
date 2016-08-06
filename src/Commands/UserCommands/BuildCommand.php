@@ -1,6 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Entity\Building;
 use TriviWars\Entity\ConstructionBuilding;
 use TriviWars\Entity\Planet;
 use TriviWars\Req;
@@ -50,6 +51,7 @@ class BuildCommand extends UserCommand
             }
 
             // Get buildings
+            /** @var Building $building */
             $building = $em->getRepository('TW:Building')->findOneBy(array('name' => $command));
             if (empty($building)) {
                 return Req::error($chat_id, 'Invalid building name');
@@ -84,11 +86,8 @@ class BuildCommand extends UserCommand
             $planet->pay($price);
             $em->merge($planet);
 
-            // Upgrade duration
-            $duration = ($price[0] + $price[1]) / (2500);
-            $duration *= 3600;
-
-            // Find the end of the first building
+            // Calculate finish time
+            $duration = $building->getDurationForLevel($planetBuilding->getLevel() + 1);
             $lastBuilding = new \DateTime($em->createQueryBuilder()
                 ->select('MAX(b.finish)')
                 ->from('TW:ConstructionBuilding', 'b')
@@ -119,6 +118,7 @@ class BuildCommand extends UserCommand
         }
 
         // Get buildings and their levels
+        /** @var Building[] $buildings */
         $buildings = $em->getRepository('TW:Building')->findAll();
         $planetBuildings = $em->getRepository('TW:PlanetBuilding')->findBy(array('planet' => $planet));
         $levels = [];
@@ -165,7 +165,12 @@ class BuildCommand extends UserCommand
             $cost .= $this->displayUnit('🌽', $price[1]);
             $cost .= $this->displayUnit('⚡', $conso, $consoCurrent);
 
-            $text .= '*'.$building->getName().'* ('.(isset($constructions[$building->getId()]) ? 'under construction' : $currentLevel.' > '.($currentLevel + 1)).')';
+            $text .= '*'.$building->getName().'*';
+            if (isset($constructions[$building->getId()])) {
+                $text .= ' (under construction: '.Building::durationToString($constructions[$building->getId()]->getRemainingTime(time())).')';
+            } else {
+                $text .= ' ('.$currentLevel.' > '.($currentLevel + 1).': '.Building::durationToString($building->getDurationForLevel($currentLevel + 1)).')';
+            }
             if (!empty($production)) {
                 $text .= "\n" . '- Production:'.$production;
             }

@@ -1,6 +1,7 @@
 <?php
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
+use TriviWars\Entity\Building;
 use TriviWars\Entity\Planet;
 use TriviWars\Req;
 use Longman\TelegramBot\Commands\UserCommand;
@@ -68,7 +69,7 @@ class StatusCommand extends UserCommand
         $ships = [];
         $defenses = [];
         foreach ($planet->getConstructionBuildings() as $c) {
-            $constructions[] = $c->getBuilding()->getName().' ('.$c->getRemainingTime(time()).')';
+            $constructions[] = $c->getBuilding()->getName().' ('.Building::durationToString($c->getRemainingTime(time())).')';
         }
 
         $text = '🌍 *'.$planet->getName().'* (5-120-7)' . "\n\n" .
