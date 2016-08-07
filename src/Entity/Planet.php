@@ -236,4 +236,12 @@ class Planet extends BaseEntity
     {
         return 2;
     }
+
+    /**
+     * @return int
+     */
+    public function getMaxResearch()
+    {
+        return 1;
+    }
 }

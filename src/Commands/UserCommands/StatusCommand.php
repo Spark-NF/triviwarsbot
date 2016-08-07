@@ -71,6 +71,9 @@ class StatusCommand extends UserCommand
         foreach ($planet->getConstructionBuildings() as $c) {
             $constructions[] = $c->getBuilding()->getName().' ('.Building::durationToString($c->getRemainingTime(time())).')';
         }
+        /*foreach ($planet->getConstructionResearch() as $c) {
+            $researchs[] = $c->getResearch()->getName().' ('.Building::durationToString($c->getRemainingTime(time())).')';
+        }*/
 
         $max = $planet->getMaxResources();
 
@@ -80,7 +83,7 @@ class StatusCommand extends UserCommand
             $this->showResource('💎', $planet->getResource3(), $max[2], $prod[2] * $factor, 'h') . "\n" .
             '⚡ '.number_format($conso).'/'.number_format($energy).' ('.number_format($energy - $conso). ($factor < 1 ? ', '.round($factor * 100).'%' : '') . ')' . "\n\n" .
             $this->showList('Constructions', $constructions, $planet->getMaxConstructions(), $researchs) . "\n" .
-            $this->showList('Research', $researchs, 0, $ships) . "\n" .
+            $this->showList('Research', $researchs, $planet->getMaxResearch(), $ships) . "\n" .
             $this->showList('Shipyard', $ships, 0, $defenses) . "\n" .
             $this->showList('Defense', $defenses, 0);
 

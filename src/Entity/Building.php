@@ -24,6 +24,18 @@ class Building extends BaseEntity
     protected $name;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", length=32, nullable=false)
+     */
+    protected $code;
+
+    /**
+     * @var int
+     * @ORM\Column(type="integer", nullable=false)
+     **/
+    protected $order;
+
+    /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
@@ -75,73 +87,67 @@ class Building extends BaseEntity
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_1_a;
+    protected $production_1_a = 0;
 
     /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_1_b;
+    protected $production_1_b = 0;
 
     /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_2_a;
+    protected $production_2_a = 0;
 
     /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_2_b;
+    protected $production_2_b = 0;
 
     /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_3_a;
+    protected $production_3_a = 0;
 
     /**
      * @var float
      * @ORM\Column(type="float", nullable=false)
      **/
-    protected $production_3_b;
+    protected $production_3_b = 0;
 
     /**
      * @var float
      * @ORM\Column(name="production_energy_a", type="float", nullable=false)
      **/
-    protected $productionEnergyA;
+    protected $productionEnergyA = 0;
 
     /**
      * @var float
      * @ORM\Column(name="production_energy_b", type="float", nullable=false)
      **/
-    protected $productionEnergyB;
+    protected $productionEnergyB = 0;
 
     /**
      * @var float
      * @ORM\Column(name="storage_1", type="float", nullable=false)
      **/
-    protected $storage1;
+    protected $storage1 = 0;
 
     /**
      * @var float
      * @ORM\Column(name="storage_2", type="float", nullable=false)
      **/
-    protected $storage2;
+    protected $storage2 = 0;
 
     /**
      * @var float
      * @ORM\Column(name="storage_3", type="float", nullable=false)
      **/
-    protected $storage3;
-
-    /**
-     * @var int
-     * @ORM\Column(type="integer", nullable=false)
-     **/
-    protected $order;
+    protected $storage3 = 0;
 
     public function getStorageForLevel($level)
     {
