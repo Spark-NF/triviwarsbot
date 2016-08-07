@@ -5,10 +5,12 @@ use Longman\TelegramBot\Request;
 
 class Req
 {
+    private static $chatId;
+
     public static function send($chat_id, $text, $markup = null)
     {
         $data = [
-            'chat_id'       => $chat_id,
+            'chat_id'       => $chat_id === null ? self::$chatId : $chat_id,
             'parse_mode'    => 'MARKDOWN',
             'text'          => $text,
         ];
@@ -36,5 +38,10 @@ class Req
     public static function debug($chat_id, $object)
     {
         return self::send($chat_id, var_export($object, true));
+    }
+
+    public static function setChatId($id)
+    {
+        self::$chatId = $id;
     }
 }

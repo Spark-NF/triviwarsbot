@@ -164,11 +164,13 @@ class Planet extends BaseEntity
                 $planetBuilding->setBuilding($c->getBuilding());
                 $planetBuilding->setPlanet($this);
                 $planetBuilding->setLevel(1);
+                $em->persist($planetBuilding);
+
                 $this->buildings[] = $planetBuilding;
             } else {
                 $planetBuilding->setLevel($planetBuilding->getLevel() + 1);
+                $em->merge($planetBuilding);
             }
-            $em->merge($planetBuilding);
             $em->remove($c);
         }
 

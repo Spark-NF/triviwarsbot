@@ -5,6 +5,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\DBAL\Driver\PDOMySql\Driver as PDOMySqlDriver;
+use Longman\TelegramBot\Entities\Update;
 use TriviWars\DB\TriviDB;
 
 class Telegram extends \Longman\TelegramBot\Telegram
@@ -57,6 +58,16 @@ class Telegram extends \Longman\TelegramBot\Telegram
         if (!empty($config['botan_token'])) {
             $this->enableBotan($config['botan_token']);
         }
+    }
+
+    public function processUpdate(Update $update)
+    {
+        if ($update->getUpdateType() === 'message') {
+            $message = $update->getMessage();
+            Req::setChatId($message->getChat()->getId());
+        }
+
+        return parent::processUpdate($update);
     }
 
     public function getPDO()

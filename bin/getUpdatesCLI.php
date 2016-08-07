@@ -4,13 +4,14 @@ require __DIR__ . '/../vendor/autoload.php';
 $config = require __DIR__ . '/../config/config.php';
 
 use TriviWars\Telegram;
+use Longman\TelegramBot\TelegramLog;
+use Longman\TelegramBot\Exception;
 
 try {
     $telegram = new Telegram($config);
-
-    // Handle telegram getUpdate request
     $ServerResponse = $telegram->handleGetUpdates();
 
+    // Print result to the console
     if ($ServerResponse->isOk()) {
         $n_update = count($ServerResponse->getResult());
         print(date('Y-m-d H:i:s', time()) . ' - Processed ' . $n_update . ' updates' . "\n");
@@ -18,11 +19,9 @@ try {
         print(date('Y-m-d H:i:s', time()) . ' - Failed to fetch updates' . "\n");
         echo $ServerResponse->printError() . "\n";
     }
-} catch (Longman\TelegramBot\Exception\TelegramException $e) {
+} catch (Exception\TelegramException $e) {
     echo $e;
-    // log telegram errors
-    \Longman\TelegramBot\TelegramLog::error($e);
-} catch (Longman\TelegramBot\Exception\TelegramLogException $e) {
-    //catch log initilization errors
+    TelegramLog::error($e);
+} catch (Exception\TelegramLogException $e) {
     echo $e;
 }

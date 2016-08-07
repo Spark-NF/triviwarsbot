@@ -40,7 +40,7 @@ class StatusCommand extends UserCommand
         $em->flush();
 
         // Get production and consumption of all buildings
-        $prod = array(60, 30);
+        $prod = array(60, 30, 0);
         $energy = 0;
         $conso = 0;
         $buildings = $planet->getBuildings();

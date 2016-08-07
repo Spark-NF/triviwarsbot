@@ -12,14 +12,6 @@ class BaseEntity
         return lcfirst($name);
     }
 
-    public function __toString()
-    {
-        if ($this->toString !== null) {
-            return $this->{$this->toString};
-        }
-        return $this->getResourceId() . ' #' . $this->getId();
-    }
-
     /**
      * @param array $data
      * @param EntityManager $om
